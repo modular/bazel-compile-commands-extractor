@@ -1140,7 +1140,7 @@ def _convert_compile_commands(aquery_output):
             }
 
 
-def _get_commands(target: str, flags: str):
+def _get_commands(target: str, flags: str, bazel_binary: str):
     """Yields compile_commands.json entries for a given target and flags, gracefully tolerating errors."""
     # Log clear completion messages
     log_info(f">>> Analyzing commands used in {target}")
@@ -1169,7 +1169,7 @@ def _get_commands(target: str, flags: str):
         # For efficiency, have bazel filter out external targets (and therefore actions) before they even get turned into actions or serialized and sent to us. Note: this is a different mechanism than is used for excluding just external headers.
         target_statment = f"filter('^(//|@//)',{target_statment})"
     aquery_args = [
-        'bazel',
+        bazel_binary,
         'aquery',
         # Aquery docs if you need em: https://docs.bazel.build/versions/master/aquery.html
         # Aquery output proto reference: https://github.com/bazelbuild/bazel/blob/master/src/main/protobuf/analysis_v2.proto
@@ -1373,9 +1373,15 @@ def main():
         # End:   template filled by Bazel
     ]
 
+    bazel_binary = (
+        # Begin: template filled by Bazel
+        {bazel_binary}
+        # End:   template filled by Bazel
+    )
+
     compile_command_entries = []
     for (target, flags) in target_flag_pairs:
-        compile_command_entries.extend(_get_commands(target, flags))
+        compile_command_entries.extend(_get_commands(target, flags, bazel_binary))
 
     if not compile_command_entries:
         log_error(""">>> Not (over)writing compile_commands.json, since no commands were extracted and an empty file is of no use.
