@@ -1188,6 +1188,8 @@ def _get_commands(target: str, flags: str, bazel_binary: str):
         '--host_features=-layering_check',
         '--features=-parse_headers',
         '--host_features=-parse_headers',
+        # Disable bes uploads, this query can produce a ton of output and there's no point uploading it.
+        '--bes_backend=',
     ]
 
     aquery_args += additional_flags
