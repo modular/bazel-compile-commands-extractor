@@ -629,7 +629,7 @@ def _get_files(compile_action):
     if os.path.splitext(source_file)[1] in _get_files.assembly_source_extensions:
         return {source_file}, set()
 
-    header_files = _get_headers(compile_action, source_file)
+    header_files = set()
 
     # Ambiguous .h headers need a language specified if they aren't C, or clangd sometimes makes mistakes
     # Delete this and unused extension variables when clangd >= 16 is released, since their underlying issues are resolved at HEAD
