@@ -96,37 +96,6 @@ _print_header_finding_warning_once.has_logged = False
 
 
 @functools.lru_cache(maxsize=None)
-def _get_bazel_version():
-    """Gets the Bazel version as a tuple of (major, minor, patch).
-
-    The rolling release and the release candidate are treated as the LTS release.
-    E.g. both 7.0.0-pre.XXXXXXXX.X and 7.0.0rc1 are treated as 7.0.0.
-    If the version can't be determined, returns (0, 0, 0).
-    """
-    bazel_version_process = subprocess.run(
-        ['bazel', 'version'],
-        # MIN_PY=3.7: Replace PIPEs with capture_output.
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        encoding=locale.getpreferredencoding(),
-        check=True, # Should always succeed.
-    )
-
-    version = ''
-    for line in bazel_version_process.stdout.splitlines():
-        line = line.strip()
-        if line.startswith('Build label: '):
-            version = line[len('Build label: '):]
-
-    match = re.search(r'^(\d+)\.(\d+)\.(\d+)', version)
-    if not match:
-        log_warning(f">>> Failed to get Bazel version.\nPlease file an issue with the following log:\n", bazel_version_process.stdout)
-        return (0, 0, 0)
-
-    return tuple(int(match.group(i)) for i in range(1, 4))
-
-
-@functools.lru_cache(maxsize=None)
 def _get_bazel_cached_action_keys():
     """Gets the set of actionKeys cached in bazel-out."""
     action_cache_process = subprocess.run(
@@ -1225,10 +1194,9 @@ def _get_commands(target: str, flags: str):
             # If https://github.com/clangd/clangd/issues/123 is resolved and we're not doing header extraction, we could try removing this, checking that there aren't erroneous red squigglies squigglies before the module maps are generated.
             # If Bazel starts supporting modules (https://github.com/bazelbuild/bazel/issues/4005), we'll probably need to make changes that subsume this.
         '--features=-layering_check',
+        '--host_features=-compiler_param_file',
+        '--host_features=-layering_check',
     ]
-
-    if _get_bazel_version() >= (6, 1, 0):
-        aquery_args += ['--host_features=-compiler_param_file', '--host_features=-layering_check']
 
     aquery_args += additional_flags
 
