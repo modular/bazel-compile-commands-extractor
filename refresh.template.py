@@ -1214,7 +1214,7 @@ def _get_commands(target: str, flags: str, bazel_binary: str):
         parsed_aquery_output = json.loads(aquery_process.stdout, object_hook=lambda d: types.SimpleNamespace(**d))
     except json.JSONDecodeError:
         print("Bazel aquery failed. Command:", aquery_args, file=sys.stderr)
-        log_warning(f">>> Failed extracting commands for {target}\n    Continuing gracefully...")
+        log_error(f">>> Failed extracting commands for {target}\n    Continuing gracefully...")
         return
 
     if not getattr(parsed_aquery_output, 'actions', None): # Unifies cases: No actions (or actions list is empty)
