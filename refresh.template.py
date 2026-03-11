@@ -1195,7 +1195,7 @@ def _get_commands(target: str, flags: str):
     In a moment, Bazel will likely fail to parse.""")
 
     # First, query Bazel's C-family compile actions for that configured target
-    target_statment = f'deps({target})'
+    target_statment = f'deps({target}) - attr(tags, no-compile-commands, deps({target}))'
     if {exclude_external_sources}:
         # For efficiency, have bazel filter out external targets (and therefore actions) before they even get turned into actions or serialized and sent to us. Note: this is a different mechanism than is used for excluding just external headers.
         target_statment = f"filter('^(//|@//)',{target_statment})"
